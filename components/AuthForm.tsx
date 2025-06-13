@@ -7,10 +7,12 @@ import { toast } from "sonner"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {Form} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import FormField from "./FormField"
 import { useRouter } from "next/navigation"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
+import { signUp,signIn } from "@/lib/actions/auth.action"
+import { auth } from "../firebase/client"
 
 
 
@@ -36,12 +38,38 @@ const AuthForm = ({type}:{type:FormType}) => {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try{
         if (type === "sign-in") {
+            const { email, password } = values;
+            const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+            const idToken = await userCredentials.user.getIdToken();
+            if (!idToken) {
+                toast.error("Failed to retrieve authentication token. Please try again.");
+                return;
+            }
+            await signIn({
+                email,idToken});
+
             toast.success("Sign-in successful!");
             router.push("/");
+
         } else if (type === "sign-up") {
+            const { name, email, password } = values;
+
+            const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+            const result = await signUp({
+                uid: userCredentials.user.uid,
+                name: name!,
+                email,
+                password
+            })
+            if (!result?.success) {
+                toast.error(result?.message || "An unknown error occurred.");
+                return;
+            }
+
+
             toast.success("Account created successfully! Please sign in.");
             router.push("/sign-in");
         }
@@ -70,8 +98,8 @@ const AuthForm = ({type}:{type:FormType}) => {
                     {!isSignIn && (
                         <FormField control={form.control} name="name" label="Name" placeholder="Your Name"/>)}
                     
-                    <p><FormField control={form.control} name="email" label="Email" placeholder="Your Email Address" type="email"/></p>
-                    <p><FormField control={form.control} name="password" label="Password" placeholder="Enter your Password" type="password"/></p>
+                    <FormField control={form.control} name="email" label="Email" placeholder="Your Email Address" type="email"/>
+                    <FormField control={form.control} name="password" label="Password" placeholder="Enter your Password" type="password"/>
                     <Button className="btn" type="submit">{isSignIn ? 'Sign-In':'Create an Account' }</Button>
                 </form>
             </Form>
