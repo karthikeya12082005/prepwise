@@ -42,7 +42,7 @@ async function Home() {
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Your Interviews</h2>
+        <h2>Take Interviews</h2>
 
         <div className="interviews-section">
           {hasPastInterviews ? (
@@ -58,13 +58,13 @@ async function Home() {
               />
             ))
           ) : (
-            <p>You haven&apos;t taken any interviews yet</p>
+            <p>There are no interviews available</p>
           )}
         </div>
       </section>
 
       <section className="flex flex-col gap-6 mt-8">
-        <h2>Take Interviews</h2>
+        <h2>Your Interviews</h2>
 
         <div className="interviews-section">
           {hasUpcomingInterviews ? (
@@ -80,7 +80,7 @@ async function Home() {
               />
             ))
           ) : (
-            <p>There are no interviews available</p>
+            <p>You haven&apos;t taken any interviews yet</p>
           )}
         </div>
       </section>
